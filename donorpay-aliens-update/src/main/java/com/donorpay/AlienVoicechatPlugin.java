@@ -10,6 +10,26 @@ import de.maxhenkel.voicechat.api.events.EventRegistration;
 public class AlienVoicechatPlugin implements VoicechatPlugin {
 
     private static double phase = 0;
+    private static java.lang.reflect.Method idMethod;
+    private static boolean idLookedUp;
+
+    private static java.util.UUID senderId(ClientReceiveSoundEvent.EntitySound event) {
+        try {
+            if (!idLookedUp) {
+                idLookedUp = true;
+                for (String n : new String[]{"getEntityId", "getId"}) {
+                    try { idMethod = ClientReceiveSoundEvent.EntitySound.class.getMethod(n); break; }
+                    catch (NoSuchMethodException ignored) { }
+                }
+                if (idMethod == null) DonorPayClient.LOG.warn("[donorpay] could not find the sender id method in the voice chat API");
+            }
+            if (idMethod != null) {
+                Object o = idMethod.invoke(event);
+                if (o instanceof java.util.UUID u) return u;
+            }
+        } catch (Exception ignored) { }
+        return null;
+    }
 
     @Override
     public String getPluginId() { return "donorpay_aliens"; }
@@ -24,7 +44,7 @@ public class AlienVoicechatPlugin implements VoicechatPlugin {
     }
 
     private void onEntitySound(ClientReceiveSoundEvent.EntitySound event) {
-        AlienMode.markTalking(event.getEntityId());
+        AlienMode.markTalking(senderId(event));
         if (AlienMode.on && AlienMode.ALIEN_VOICE) {
             short[] raw = event.getRawAudio();
             if (raw != null && raw.length > 0) {
