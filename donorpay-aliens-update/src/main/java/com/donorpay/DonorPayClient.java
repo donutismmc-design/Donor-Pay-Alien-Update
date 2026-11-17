@@ -1,6 +1,9 @@
 package com.donorpay;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.minecraft.client.KeyMapping;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
@@ -78,22 +81,17 @@ public class DonorPayClient implements ClientModInitializer {
             "§c§lFIRE PAYMENT!!", "SYSTEM ALERT", "", "§2§l$$$ CASH $$$"};
     static final String RAINBOW = "c6eab9d";
 
-    static boolean oDown = false;
+    static KeyMapping alienKey;
 
     @Override
     public void onInitializeClient() {
         LOG.info("[donorpay] loaded");
 
-        // Press O (not while a menu/chat is open) to toggle Alien Mode
+        // Press O (a normal Minecraft key binding, changeable in Options > Controls) to toggle Alien Mode
+        KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("donorpay", "main"));
+        alienKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.donorpay.alien", InputConstants.KEY_O, category));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player == null) { oDown = false; return; }
-            long win = org.lwjgl.glfw.GLFW.glfwGetCurrentContext();
-            // cursor is "disabled" (grabbed) only while playing with no menu/chat open
-            boolean inGame = win != 0 && org.lwjgl.glfw.GLFW.glfwGetInputMode(win, org.lwjgl.glfw.GLFW.GLFW_CURSOR) == org.lwjgl.glfw.GLFW.GLFW_CURSOR_DISABLED;
-            if (!inGame) { oDown = false; return; }
-            boolean down = org.lwjgl.glfw.GLFW.glfwGetKey(win, org.lwjgl.glfw.GLFW.GLFW_KEY_O) == org.lwjgl.glfw.GLFW.GLFW_PRESS;
-            if (down && !oDown) AlienMode.toggle();
-            oDown = down;
+            while (alienKey.consumeClick()) AlienMode.toggle();
         });
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (!overlay) handle(message.getString());
