@@ -86,9 +86,12 @@ public class DonorPayClient implements ClientModInitializer {
 
         // Press O (not while a menu/chat is open) to toggle Alien Mode
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.player == null || client.screen != null) { oDown = false; return; }
+            if (client.player == null) { oDown = false; return; }
             long win = org.lwjgl.glfw.GLFW.glfwGetCurrentContext();
-            boolean down = win != 0 && org.lwjgl.glfw.GLFW.glfwGetKey(win, org.lwjgl.glfw.GLFW.GLFW_KEY_O) == org.lwjgl.glfw.GLFW.GLFW_PRESS;
+            // cursor is "disabled" (grabbed) only while playing with no menu/chat open
+            boolean inGame = win != 0 && org.lwjgl.glfw.GLFW.glfwGetInputMode(win, org.lwjgl.glfw.GLFW.GLFW_CURSOR) == org.lwjgl.glfw.GLFW.GLFW_CURSOR_DISABLED;
+            if (!inGame) { oDown = false; return; }
+            boolean down = org.lwjgl.glfw.GLFW.glfwGetKey(win, org.lwjgl.glfw.GLFW.GLFW_KEY_O) == org.lwjgl.glfw.GLFW.GLFW_PRESS;
             if (down && !oDown) AlienMode.toggle();
             oDown = down;
         });
