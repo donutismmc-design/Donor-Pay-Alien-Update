@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "donorpay",
+  "version": "${version}",
+  "name": "Donor Pay Alerts + Alien Mode",
+  "description": "Big payment alerts on Donut SMP, plus Alien Mode (press O).",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.donorpay.DonorPayClient"],
+    "voicechat": ["com.donorpay.AlienVoicechatPlugin"]
+  },
+  "mixins": ["donorpay.mixins.json"],
+  "depends": { "fabricloader": ">=0.16.0", "fabric-api": "*" },
+  "suggests": { "voicechat": "*" }
+}

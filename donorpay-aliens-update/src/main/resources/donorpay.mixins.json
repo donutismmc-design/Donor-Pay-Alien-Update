@@ -1,0 +1,8 @@
+{
+  "required": false,
+  "package": "com.donorpay.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "AvatarRendererMixin"
+  ]
+}
